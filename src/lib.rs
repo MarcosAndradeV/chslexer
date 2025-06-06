@@ -59,7 +59,7 @@ impl<'src> PeekableLexer<'src> {
         }
     }
     pub fn peek_token(&mut self) -> &Token<'src> {
-        if self.peeked.is_some() {
+        if self.peeked.is_none() {
             self.peeked = Some(self.next_token());
         }
         self.peeked.as_ref().unwrap()
