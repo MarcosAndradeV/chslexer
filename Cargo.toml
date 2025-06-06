@@ -1,0 +1,7 @@
+[package]
+name = "chslexer"
+version = "0.1.0"
+edition = "2024"
+description = "A fast and flexible lexer for building programming language tools, compilers, or interpreters in Rust."
+
+[dependencies]
