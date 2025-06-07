@@ -34,7 +34,7 @@ pub struct Lexer<'src> {
     source: &'src str,
     data: &'src [u8],
     pos: usize,
-    loc: Loc,
+    loc: Loc<'src>,
     is_keyword_fn: IsKeywordFn,
     is_binop_fn: IsBinopFn,
 }
@@ -45,10 +45,10 @@ pub struct PeekableLexer<'src> {
 }
 
 impl<'src> PeekableLexer<'src> {
-    pub fn new(source: &'src str) -> Self {
+    pub fn new(file_path: &'src str, source: &'src str) -> Self {
         Self {
             peeked: None,
-            lexer: Lexer::new(source),
+            lexer: Lexer::new(file_path, source),
         }
     }
     pub fn next_token(&mut self) -> Token<'src> {
@@ -87,11 +87,11 @@ impl<'src> PeekableLexer<'src> {
 }
 
 impl<'src> Lexer<'src> {
-    pub fn new(source: &'src str) -> Self {
+    pub fn new(file_path: &'src str, source: &'src str) -> Self {
         Self {
             source,
             data: source.as_bytes(),
-            loc: Loc::new(1, 1),
+            loc: Loc::new(file_path, 1, 1),
             pos: 0,
             is_keyword_fn: is_keyword_default,
             is_binop_fn: is_binop_default,
@@ -406,7 +406,7 @@ impl<'src> Lexer<'src> {
         )
     }
 
-    pub fn loc(&self) -> Loc {
+    pub fn loc(&self) -> Loc<'src> {
         self.loc
     }
 
@@ -464,7 +464,7 @@ impl<'src> Lexer<'src> {
 #[derive(Debug, Default, Clone)]
 pub struct Token<'src> {
     pub kind: TokenKind,
-    pub loc: Loc,
+    pub loc: Loc<'src>,
     pub source: &'src str,
 }
 
@@ -519,7 +519,7 @@ impl fmt::Display for Token<'_> {
 }
 
 impl<'src> Token<'src> {
-    pub fn new(kind: TokenKind, loc: Loc, source: &'src str) -> Self {
+    pub fn new(kind: TokenKind, loc: Loc<'src>, source: &'src str) -> Self {
         Self { kind, loc, source }
     }
 
@@ -642,20 +642,25 @@ pub enum TokenKind {
 }
 
 #[derive(Debug, Default, Clone, Copy)]
-pub struct Loc {
+pub struct Loc<'src> {
+    pub file_path: &'src str,
     pub line: usize,
     pub col: usize,
 }
 
-impl fmt::Display for Loc {
+impl fmt::Display for Loc<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}:{}", self.line, self.col)
+        write!(f, "{}:{}:{}", self.file_path, self.line, self.col)
     }
 }
 
-impl Loc {
-    pub fn new(line: usize, col: usize) -> Self {
-        Self { line, col }
+impl<'src> Loc<'src> {
+    pub fn new(file_path: &'src str, line: usize, col: usize) -> Self {
+        Self {
+            file_path,
+            line,
+            col,
+        }
     }
 
     pub fn next_column(&mut self) {
