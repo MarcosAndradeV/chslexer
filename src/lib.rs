@@ -1,6 +1,6 @@
-use std::fmt;
 #[cfg(test)]
 mod tests;
+use std::fmt;
 
 pub fn is_keyword_default(_: &str) -> bool {
     false
@@ -156,6 +156,10 @@ impl<'src> Lexer<'src> {
 
             let tok = match ch {
                 b'/' if self.read_char() == b'/' => {
+                    while self.advance() != b'\n' {}
+                    continue;
+                }
+                b'#' => {
                     while self.advance() != b'\n' {}
                     continue;
                 }
@@ -419,7 +423,6 @@ impl<'src> Lexer<'src> {
             let ch = self.read_char();
             match ch {
                 _ if ch.is_ascii_whitespace() => {
-                    self.advance();
                     break;
                 }
                 b'(' => {
@@ -461,7 +464,7 @@ impl<'src> Lexer<'src> {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct Token<'src> {
     pub kind: TokenKind,
     pub loc: Loc<'src>,

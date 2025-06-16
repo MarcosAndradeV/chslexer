@@ -1,7 +1,7 @@
 use super::*;
 
 fn lex_all(input: &str) -> Vec<Token> {
-    let mut lexer = Lexer::new(input);
+    let mut lexer = Lexer::new(file!(), input);
     let mut tokens = Vec::new();
     loop {
         let tok = lexer.next_token();
@@ -17,7 +17,7 @@ fn lex_all(input: &str) -> Vec<Token> {
 fn test_identifiers_and_keywords() {
     let input = "let foo = bar;";
     let tokens = {
-        let mut lexer = Lexer::new(input);
+        let mut lexer = Lexer::new(file!(), input);
         lexer.set_is_keyword_fn(|k| matches!(k, "let"));
         let mut tokens = Vec::new();
         loop {
